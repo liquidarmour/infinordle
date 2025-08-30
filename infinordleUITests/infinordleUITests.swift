@@ -16,6 +16,7 @@ final class infinordleUITests: XCTestCase {
     @MainActor
     func testGameFlow() throws {
         let app = XCUIApplication()
+        app.launchEnvironment = ["SECRET_WORD": "APPLE"]
         app.launch()
 
         // This is a simple test that simulates a winning game.

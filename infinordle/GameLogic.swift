@@ -17,10 +17,19 @@ class GameLogic: ObservableObject {
 
     let letters = "QWERTYUIOPASDFGHJKLZXCVBNM"
 
+    init() {
+        if let secretWordEnv = ProcessInfo.processInfo.environment["SECRET_WORD"] {
+            if fiveLetterWords.contains(secretWordEnv) {
+                self.secretWord = secretWordEnv
+            }
+        }
+    }
+
     func submitGuess() {
         guard guess.count == 5 else { return }
         guard fiveLetterWords.contains(guess) else {
             showInvalidWordAlert = true
+            guess = ""
             return
         }
         submittedGuesses.append(guess)

@@ -33,6 +33,7 @@ struct infinordleTests {
         game.guess = "QWERT"
         game.submitGuess()
         #expect(game.showInvalidWordAlert == true)
+        #expect(game.guess.isEmpty == true)
     }
 
     @Test func testCorrectLetterCorrectPosition() {
