@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var game = GameLogic()
 
-    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 10)
     let letterColumns: [GridItem] = Array(repeating: .init(.flexible()), count: 5)
 
 
@@ -37,48 +36,34 @@ struct ContentView: View {
 
                 Spacer()
 
-                LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(game.letters.map { String($0) }, id: \.self) { letter in
-                        Button(action: {
-                            if game.guess.count < 5 {
-                                game.guess += letter
+                VStack {
+                    ForEach(game.keyboardRows, id: \.self) { row in
+                        HStack(spacing: 5) {
+                            ForEach(row, id: \.self) { key in
+                                Button(action: {
+                                    if key == "DELETE" {
+                                        if !game.guess.isEmpty {
+                                            game.guess.removeLast()
+                                        }
+                                    } else if key == "ENTER" {
+                                        game.submitGuess()
+                                    } else if game.guess.count < 5 {
+                                        game.guess += key
+                                    }
+                                }) {
+                                    Text(key)
+                                        .font(.system(size: key.count > 1 ? 14 : 18))
+                                        .frame(minWidth: 20)
+                                        .padding(10)
+                                        .background(Color.gray.opacity(0.5))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(5)
+                                }
                             }
-                        }) {
-                            Text(letter)
-                                .font(.title)
-                                .frame(width: 30, height: 50)
-                                .background(Color.gray.opacity(0.5))
-                                .cornerRadius(5)
                         }
                     }
                 }
                 .padding()
-                
-                HStack {
-                    Button(action: {
-                        if !game.guess.isEmpty {
-                            game.guess.removeLast()
-                        }
-                    }) {
-                        Text("Delete")
-                            .font(.title)
-                            .padding()
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    
-                    Button(action: {
-                        game.submitGuess()
-                    }) {
-                        Text("Enter")
-                            .font(.title)
-                            .padding()
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                }
             }
             .padding()
             .alert("You Win!", isPresented: $game.showWinAlert) {

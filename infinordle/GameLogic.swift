@@ -15,7 +15,11 @@ class GameLogic: ObservableObject {
     @Published var showLossAlert = false
     @Published var showInvalidWordAlert = false
 
-    let letters = "QWERTYUIOPASDFGHJKLZXCVBNM"
+    let keyboardRows: [[String]] = [
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+        ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "DELETE"]
+    ]
 
     init() {
         if let secretWordEnv = ProcessInfo.processInfo.environment["SECRET_WORD"] {
