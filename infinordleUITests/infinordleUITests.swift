@@ -29,7 +29,7 @@ final class infinordleUITests: XCTestCase {
             app.buttons[String(letter)].tap()
         }
         
-        app.buttons["Enter"].tap()
+        app.buttons["ENTER"].tap()
         
         // Check for the "You Win!" alert
         let winAlert = app.alerts["You Win!"]
@@ -53,7 +53,7 @@ final class infinordleUITests: XCTestCase {
             app.buttons[String(letter)].tap()
         }
         
-        app.buttons["Enter"].tap()
+        app.buttons["ENTER"].tap()
         
         let invalidWordPopup = app.staticTexts["Invalid Word"]
         XCTAssertTrue(invalidWordPopup.waitForExistence(timeout: 1))
