@@ -22,5 +22,5 @@ jobs:
     - name: Run tests
       run: |
         xcodebuild test -scheme infinordle \
-                       -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
+                       -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.6' \
                        -enableCodeCoverage YES
