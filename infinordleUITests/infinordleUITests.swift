@@ -42,4 +42,25 @@ final class infinordleUITests: XCTestCase {
         let firstCell = app.staticTexts.element(boundBy: 0)
         XCTAssertEqual(firstCell.label, " ")
     }
+
+    @MainActor
+    func testInvalidWordPopup() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let invalidWord = "QWERT"
+        for letter in invalidWord {
+            app.buttons[String(letter)].tap()
+        }
+        
+        app.buttons["Enter"].tap()
+        
+        let invalidWordPopup = app.staticTexts["Invalid Word"]
+        XCTAssertTrue(invalidWordPopup.waitForExistence(timeout: 1))
+        
+        // The popup should disappear after 3 seconds, so we'll wait for it to disappear.
+        // We'll use a longer timeout here to account for the 3-second delay.
+        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: invalidWordPopup)
+        wait(for: [expectation], timeout: 5)
+    }
 }

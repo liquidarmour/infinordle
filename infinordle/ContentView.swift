@@ -15,83 +15,94 @@ struct ContentView: View {
 
 
     var body: some View {
-        VStack {
-            LazyVGrid(columns: letterColumns, spacing: 10) {
-                ForEach(0..<30) { index in
-                    let rowIndex = index / 5
-                    let colIndex = index % 5
-                    let character: Character? = (game.submittedGuesses.count > rowIndex && game.submittedGuesses[rowIndex].count > colIndex) ? game.submittedGuesses[rowIndex][game.submittedGuesses[rowIndex].index(game.submittedGuesses[rowIndex].startIndex, offsetBy: colIndex)] : nil
-                    let currentGuessCharacter: Character? = (rowIndex == game.submittedGuesses.count && game.guess.count > colIndex) ? game.guess[game.guess.index(game.guess.startIndex, offsetBy: colIndex)] : nil
-                    
-                    let colorTuple = game.cellColor(for: character, at: colIndex, rowIndex: rowIndex)
-                    
-                    Text(String(currentGuessCharacter ?? character ?? " "))
-                        .font(.largeTitle)
-                        .frame(width: 60, height: 60)
-                        .border(Color.black)
-                        .background(Color(red: colorTuple.red, green: colorTuple.green, blue: colorTuple.blue))
+        ZStack {
+            VStack {
+                LazyVGrid(columns: letterColumns, spacing: 10) {
+                    ForEach(0..<30) { index in
+                        let rowIndex = index / 5
+                        let colIndex = index % 5
+                        let character: Character? = (game.submittedGuesses.count > rowIndex && game.submittedGuesses[rowIndex].count > colIndex) ? game.submittedGuesses[rowIndex][game.submittedGuesses[rowIndex].index(game.submittedGuesses[rowIndex].startIndex, offsetBy: colIndex)] : nil
+                        let currentGuessCharacter: Character? = (rowIndex == game.submittedGuesses.count && game.guess.count > colIndex) ? game.guess[game.guess.index(game.guess.startIndex, offsetBy: colIndex)] : nil
+                        
+                        let colorTuple = game.cellColor(for: character, at: colIndex, rowIndex: rowIndex)
+                        
+                        Text(String(currentGuessCharacter ?? character ?? " "))
+                            .font(.largeTitle)
+                            .frame(width: 60, height: 60)
+                            .border(Color.black)
+                            .background(Color(red: colorTuple.red, green: colorTuple.green, blue: colorTuple.blue))
+                    }
                 }
-            }
-            .padding()
+                .padding()
 
-            Spacer()
+                Spacer()
 
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(game.letters.map { String($0) }, id: \.self) { letter in
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(game.letters.map { String($0) }, id: \.self) { letter in
+                        Button(action: {
+                            if game.guess.count < 5 {
+                                game.guess += letter
+                            }
+                        }) {
+                            Text(letter)
+                                .font(.title)
+                                .frame(width: 30, height: 50)
+                                .background(Color.gray.opacity(0.5))
+                                .cornerRadius(5)
+                        }
+                    }
+                }
+                .padding()
+                
+                HStack {
                     Button(action: {
-                        if game.guess.count < 5 {
-                            game.guess += letter
+                        if !game.guess.isEmpty {
+                            game.guess.removeLast()
                         }
                     }) {
-                        Text(letter)
+                        Text("Delete")
                             .font(.title)
-                            .frame(width: 30, height: 50)
-                            .background(Color.gray.opacity(0.5))
-                            .cornerRadius(5)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    
+                    Button(action: {
+                        game.submitGuess()
+                    }) {
+                        Text("Enter")
+                            .font(.title)
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
                 }
             }
             .padding()
-            
-            HStack {
-                Button(action: {
-                    if !game.guess.isEmpty {
-                        game.guess.removeLast()
-                    }
-                }) {
-                    Text("Delete")
-                        .font(.title)
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                
-                Button(action: {
-                    game.submitGuess()
-                }) {
-                    Text("Enter")
-                        .font(.title)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
+            .alert("You Win!", isPresented: $game.showWinAlert) {
+                Button("Play Again", action: game.resetGame)
             }
-        }
-        .padding()
-        .alert("You Win!", isPresented: $game.showWinAlert) {
-            Button("Play Again", action: game.resetGame)
-        }
-        .alert("You Lose!", isPresented: $game.showLossAlert) {
-            Button("Play Again", action: game.resetGame)
-        } message: {
-            Text("The word was \(game.secretWord)")
-        }
-        .alert("Invalid Word", isPresented: $game.showInvalidWordAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Please enter a valid 5-letter word.")
+            .alert("You Lose!", isPresented: $game.showLossAlert) {
+                Button("Play Again", action: game.resetGame)
+            } message: {
+                Text("The word was \(game.secretWord)")
+            }
+
+            if game.showInvalidWordAlert {
+                Text("Invalid Word")
+                    .padding()
+                    .background(Color.black.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .transition(.opacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            game.showInvalidWordAlert = false
+                        }
+                    }
+            }
         }
     }
 }
