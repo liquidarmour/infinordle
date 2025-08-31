@@ -40,14 +40,12 @@ struct ContentView: View {
                 LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(game.letters.map { String($0) }, id: \.self) { letter in
                         Button(action: {
-                            if game.guess.count < 5 {
-                                game.guess += letter
-                            }
+                            game.handleKeyPress(letter)
                         }) {
                             Text(letter)
                                 .font(.title)
                                 .frame(width: 30, height: 50)
-                                .background(Color.gray.opacity(0.5))
+                                .background(game.keyboardKeyColor(for: Character(letter)))
                                 .cornerRadius(5)
                         }
                     }
@@ -56,9 +54,7 @@ struct ContentView: View {
                 
                 HStack {
                     Button(action: {
-                        if !game.guess.isEmpty {
-                            game.guess.removeLast()
-                        }
+                        game.handleKeyPress(GameLogic.deleteKey)
                     }) {
                         Text("Delete")
                             .font(.title)
@@ -69,7 +65,7 @@ struct ContentView: View {
                     }
                     
                     Button(action: {
-                        game.submitGuess()
+                        game.handleKeyPress(GameLogic.enterKey)
                     }) {
                         Text("Enter")
                             .font(.title)

@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
+
+enum LetterStatus {
+    case correct, misplaced, wrong, unknown
+}
 
 class GameLogic: ObservableObject {
     @Published var guess = ""
@@ -14,8 +19,12 @@ class GameLogic: ObservableObject {
     @Published var showWinAlert = false
     @Published var showLossAlert = false
     @Published var showInvalidWordAlert = false
+    @Published var letterStatuses: [Character: LetterStatus] = [:]
 
     let letters = "QWERTYUIOPASDFGHJKLZXCVBNM"
+    
+    static let enterKey = "ENTER"
+    static let deleteKey = "DELETE"
 
     init() {
         if let secretWordEnv = ProcessInfo.processInfo.environment["SECRET_WORD"] {
@@ -23,6 +32,7 @@ class GameLogic: ObservableObject {
                 self.secretWord = secretWordEnv
             }
         }
+        resetLetterStatuses()
     }
 
     func submitGuess() {
@@ -33,6 +43,7 @@ class GameLogic: ObservableObject {
             return
         }
         submittedGuesses.append(guess)
+        updateLetterStatuses()
 
         if guess == secretWord {
             showWinAlert = true
@@ -49,6 +60,46 @@ class GameLogic: ObservableObject {
         showWinAlert = false
         showLossAlert = false
         showInvalidWordAlert = false
+        resetLetterStatuses()
+    }
+    
+    func resetLetterStatuses() {
+        for char in letters {
+            letterStatuses[char] = .unknown
+        }
+    }
+
+    func updateLetterStatuses() {
+        guard let lastGuess = submittedGuesses.last else { return }
+        let secretWordArray = Array(secretWord)
+
+        for (index, char) in lastGuess.enumerated() {
+            if secretWordArray[index] == char {
+                letterStatuses[char] = .correct
+            } else if secretWord.contains(char) {
+                if letterStatuses[char] != .correct {
+                    letterStatuses[char] = .misplaced
+                }
+            } else {
+                letterStatuses[char] = .wrong
+            }
+        }
+    }
+
+    func keyboardKeyColor(for letter: Character) -> Color {
+        if let status = letterStatuses[letter] {
+            switch status {
+            case .correct:
+                return .green
+            case .misplaced:
+                return .yellow
+            case .wrong:
+                return .gray
+            case .unknown:
+                return Color.gray.opacity(0.5)
+            }
+        }
+        return Color.gray.opacity(0.5)
     }
 
     func cellColor(for character: Character?, at colIndex: Int, rowIndex: Int) -> (red: Double, green: Double, blue: Double) {
@@ -69,5 +120,17 @@ class GameLogic: ObservableObject {
         }
         
         return (1, 1, 1) // white
+    }
+    
+    func handleKeyPress(_ key: String) {
+        if key == Self.deleteKey {
+            if !guess.isEmpty {
+                guess.removeLast()
+            }
+        } else if key == Self.enterKey {
+            submitGuess()
+        } else if guess.count < 5 {
+            guess += key
+        }
     }
 }
